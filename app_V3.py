@@ -6,7 +6,7 @@ from ctypes import wintypes
 import psutil
 
 from PySide6.QtCore import Qt, QTimer, QPoint, QThread, Signal, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap, QAction, QFontDatabase, QFontMetrics
+from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap, QAction, QFontMetrics
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QHBoxLayout, QVBoxLayout, QToolButton,
     QFrame, QSystemTrayIcon, QMenu, QGraphicsDropShadowEffect
@@ -138,33 +138,30 @@ class MonitorWidget(QWidget):
         self.clean_btn.setText("🚀")
         self.clean_btn.setToolTip("Clean RAM")
 
-        font = QFont("Segoe UI", 10, QFont.DemiBold)
+        # Base font (labels and values share the same font)
+        base_font = QFont("Segoe UI", 12, QFont.DemiBold)
 
-        # Static text labels (plain, no BiDi controls)
+        # Static text labels
         self.ram_text = QLabel("RAM:", self.panel)
         self.cpu_text = QLabel("CPU:", self.panel)
-        self.ram_text.setFont(font)
-        self.cpu_text.setFont(font)
+        self.ram_text.setFont(base_font)
+        self.cpu_text.setFont(base_font)
         self.ram_text.setTextFormat(Qt.PlainText)
         self.cpu_text.setTextFormat(Qt.PlainText)
         self.ram_text.setLayoutDirection(Qt.LeftToRight)
         self.cpu_text.setLayoutDirection(Qt.LeftToRight)
 
-        # Value labels
+        # Value labels (same font/style as static labels)
         self.ram_val = QLabel(self.panel)
         self.cpu_val = QLabel(self.panel)
-
-        # Use a fixed-width font for stable digits, right-aligned, plain text
-        num_font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
-        num_font.setPointSize(12)  # match stylesheet's 12pt for consistent metrics
         for lbl in (self.ram_val, self.cpu_val):
-            lbl.setFont(num_font)
+            lbl.setFont(base_font)
             lbl.setTextFormat(Qt.PlainText)
             lbl.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             lbl.setLayoutDirection(Qt.LeftToRight)
 
-        # Fix width to fit "100%" so the label area is constant
-        fm = QFontMetrics(num_font)
+        # Fix width to fit "100%" so the label area is constant and stable
+        fm = QFontMetrics(self.ram_val.font())
         fixed_w = fm.horizontalAdvance("100%")
         self.ram_val.setFixedWidth(fixed_w)
         self.cpu_val.setFixedWidth(fixed_w)
